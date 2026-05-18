@@ -1,11 +1,10 @@
 import { createClient } from "@/lib/supabase/server";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import TabInfo from "./tabs/TabInfo";
 import TabSesiones from "./tabs/TabSesiones";
 import TabTareas from "./tabs/TabTareas";
 import TabFormularios from "./tabs/TabFormularios";
-
-const progresoLabel = ["", "Sin avance", "Poco avance", "Avance moderado", "Buen avance", "Avance significativo"];
 
 type Tab = "info" | "sesiones" | "tareas" | "formularios";
 
@@ -116,73 +115,6 @@ export default async function PersonaDetailPage({
       {tab === "sesiones" && <TabSesiones personaId={id} estadoFiltro={sp.estado} />}
       {tab === "tareas" && <TabTareas personaId={id} />}
       {tab === "formularios" && <TabFormularios personaId={id} nombrePersona={`${persona.nombre} ${persona.apellido}`} />}
-    </div>
-  );
-}
-
-function TabInfo({
-  persona,
-  id,
-}: {
-  persona: {
-    telefono: string | null; email: string | null; estado_civil: string | null;
-    ocupacion: string | null; fecha_nacimiento: string | null; motivo_inicial: string | null;
-    notas_generales: string | null;
-  };
-  id: string;
-}) {
-  return (
-    <div className="bg-white border border-stone-200 rounded-xl p-6">
-      <div className="flex items-center justify-between mb-5">
-        <h2 className="font-medium text-stone-700">Información personal</h2>
-        <Link href={`/personas/${id}/editar`} className="text-sm text-amber-700 hover:text-amber-800 font-medium">
-          Editar →
-        </Link>
-      </div>
-      <div className="grid grid-cols-3 gap-5 text-sm">
-        {persona.telefono && (
-          <div>
-            <p className="text-xs text-stone-400 mb-0.5">Teléfono</p>
-            <p className="text-stone-700">{persona.telefono}</p>
-          </div>
-        )}
-        {persona.email && (
-          <div>
-            <p className="text-xs text-stone-400 mb-0.5">Correo</p>
-            <p className="text-stone-700">{persona.email}</p>
-          </div>
-        )}
-        {persona.estado_civil && (
-          <div>
-            <p className="text-xs text-stone-400 mb-0.5">Estado civil</p>
-            <p className="text-stone-700 capitalize">{persona.estado_civil.replace("_", " ")}</p>
-          </div>
-        )}
-        {persona.ocupacion && (
-          <div>
-            <p className="text-xs text-stone-400 mb-0.5">Ocupación</p>
-            <p className="text-stone-700">{persona.ocupacion}</p>
-          </div>
-        )}
-        {persona.fecha_nacimiento && (
-          <div>
-            <p className="text-xs text-stone-400 mb-0.5">Fecha de nacimiento</p>
-            <p className="text-stone-700">{new Date(persona.fecha_nacimiento + "T00:00:00").toLocaleDateString("es")}</p>
-          </div>
-        )}
-      </div>
-      {persona.motivo_inicial && (
-        <div className="mt-6 pt-5 border-t border-stone-100">
-          <p className="text-xs text-stone-400 mb-1">Motivo inicial</p>
-          <p className="text-sm text-stone-600 leading-relaxed whitespace-pre-line">{persona.motivo_inicial}</p>
-        </div>
-      )}
-      {persona.notas_generales && (
-        <div className="mt-4">
-          <p className="text-xs text-stone-400 mb-1">Notas generales</p>
-          <p className="text-sm text-stone-600 leading-relaxed whitespace-pre-line">{persona.notas_generales}</p>
-        </div>
-      )}
     </div>
   );
 }
