@@ -7,13 +7,40 @@ import Link from "next/link";
 
 type PersonaBasica = { id: string; nombre: string; apellido: string };
 type Plantilla = { id: string; nombre: string; descripcion: string | null };
+type Audiencia = "adulto" | "adolescente" | "nino" | "matrimonial";
 
-const tiposFormulario = [
-  { value: "consentimiento_informado", label: "Consentimiento informado", desc: "Autorización, confidencialidad y términos del proceso." },
-  { value: "evaluacion_inicial", label: "Evaluación inicial", desc: "Historia personal, motivo de consulta y contexto espiritual." },
-  { value: "seguimiento_semanal", label: "Seguimiento semanal", desc: "Cómo fue la semana, tareas y petición de oración." },
-  { value: "tareas_terapeuticas", label: "Tareas terapéuticas", desc: "Reporte del aconsejado sobre compromisos asignados." },
+const audiencias: { value: Audiencia; emoji: string; label: string; desc: string }[] = [
+  { value: "adulto",      emoji: "🤍", label: "Adulto",              desc: "Reflexivo, pastoral, profundo." },
+  { value: "adolescente", emoji: "💜", label: "Adolescente",         desc: "Moderno, cercano, fácil de responder." },
+  { value: "nino",        emoji: "🌟", label: "Niño",                desc: "Visual, simple, divertido." },
+  { value: "matrimonial", emoji: "💍", label: "Matrimonial / Familiar", desc: "Para responder en pareja, sin culpas." },
 ];
+
+// Tipos disponibles por audiencia.
+// Evaluación y seguimiento cambian según audiencia; consentimiento y tareas
+// siguen siendo transversales y solo aparecen para adulto y matrimonial.
+function tiposPorAudiencia(aud: Audiencia) {
+  const evaluacion = {
+    adulto:      { value: "evaluacion_inicial",      label: "Evaluación inicial",     desc: "Historia, situación actual y caminar espiritual." },
+    adolescente: { value: "evaluacion_adolescente",  label: "Evaluación inicial",     desc: "Diseñada para adolescentes — moderna y cercana." },
+    nino:        { value: "evaluacion_nino",         label: "Evaluación inicial",     desc: "Muy simple y visual, paso a paso." },
+    matrimonial: { value: "evaluacion_matrimonial",  label: "Evaluación matrimonial", desc: "Para responder juntos, sin acusaciones." },
+  }[aud];
+
+  const seguimiento = {
+    adulto:      { value: "seguimiento_semanal",       label: "Seguimiento semanal", desc: "Cómo fue la semana y petición de oración." },
+    adolescente: { value: "seguimiento_adolescente",   label: "Seguimiento semanal", desc: "Rápido, con emojis y poco texto." },
+    nino:        { value: "seguimiento_nino",          label: "Seguimiento semanal", desc: "Solo unas preguntitas, muy fácil." },
+    matrimonial: { value: "seguimiento_matrimonial",   label: "Seguimiento semanal", desc: "Para responder juntos esta semana." },
+  }[aud];
+
+  const tipos = [evaluacion, seguimiento];
+  if (aud === "adulto" || aud === "matrimonial") {
+    tipos.unshift({ value: "consentimiento_informado", label: "Consentimiento informado", desc: "Autorización, confidencialidad y términos." });
+    tipos.push({ value: "tareas_terapeuticas",        label: "Tareas terapéuticas",      desc: "Reporte sobre tareas asignadas." });
+  }
+  return tipos;
+}
 
 function NuevoFormularioForm() {
   const supabase = createClient();
@@ -24,6 +51,7 @@ function NuevoFormularioForm() {
   const [link, setLink] = useState<string | null>(null);
   const [copiado, setCopiado] = useState(false);
   const [modo, setModo] = useState<"estandar" | "personalizado">("estandar");
+  const [audiencia, setAudiencia] = useState<Audiencia>("adulto");
 
   const [form, setForm] = useState({
     persona_id: searchParams.get("persona_id") ?? "",
@@ -42,6 +70,12 @@ function NuevoFormularioForm() {
     });
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  function cambiarAudiencia(a: Audiencia) {
+    setAudiencia(a);
+    const tipos = tiposPorAudiencia(a);
+    setForm((p) => (tipos.some((t) => t.value === p.tipo) ? p : { ...p, tipo: tipos[0].value }));
+  }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -97,6 +131,7 @@ function NuevoFormularioForm() {
     );
   }
 
+  const tiposActuales = tiposPorAudiencia(audiencia);
   const puedeEnviar = form.persona_id && (modo === "estandar" || (modo === "personalizado" && form.plantilla_id));
 
   return (
@@ -139,19 +174,47 @@ function NuevoFormularioForm() {
         </div>
 
         {modo === "estandar" && (
-          <div className="grid grid-cols-2 gap-3">
-            {tiposFormulario.map((t) => (
-              <button
-                key={t.value}
-                type="button"
-                onClick={() => setForm((p) => ({ ...p, tipo: t.value }))}
-                className={`text-left p-3.5 rounded-xl border-2 transition-all ${form.tipo === t.value ? "border-amber-500 bg-amber-50" : "border-stone-200 hover:border-stone-300"}`}
-              >
-                <p className="text-sm font-medium text-stone-800">{t.label}</p>
-                <p className="text-xs text-stone-400 mt-0.5">{t.desc}</p>
-              </button>
-            ))}
-          </div>
+          <>
+            <div>
+              <label className="label">¿Para quién es este formulario?</label>
+              <p className="text-xs text-stone-400 mb-3">
+                Cada etapa de vida tiene preguntas, lenguaje y experiencia diferentes.
+              </p>
+              <div className="grid grid-cols-2 gap-2.5">
+                {audiencias.map((a) => (
+                  <button
+                    key={a.value}
+                    type="button"
+                    onClick={() => cambiarAudiencia(a.value)}
+                    className={`text-left p-3 rounded-xl border-2 transition-all ${audiencia === a.value ? "border-amber-500 bg-amber-50" : "border-stone-200 hover:border-stone-300"}`}
+                  >
+                    <div className="flex items-center gap-2">
+                      <span className="text-lg">{a.emoji}</span>
+                      <p className="text-sm font-medium text-stone-800">{a.label}</p>
+                    </div>
+                    <p className="text-xs text-stone-400 mt-1">{a.desc}</p>
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div className="pt-2 border-t border-stone-100">
+              <label className="label">Tipo</label>
+              <div className="grid grid-cols-1 gap-2 mt-1">
+                {tiposActuales.map((t) => (
+                  <button
+                    key={t.value}
+                    type="button"
+                    onClick={() => setForm((p) => ({ ...p, tipo: t.value }))}
+                    className={`text-left p-3.5 rounded-xl border-2 transition-all ${form.tipo === t.value ? "border-amber-500 bg-amber-50" : "border-stone-200 hover:border-stone-300"}`}
+                  >
+                    <p className="text-sm font-medium text-stone-800">{t.label}</p>
+                    <p className="text-xs text-stone-400 mt-0.5">{t.desc}</p>
+                  </button>
+                ))}
+              </div>
+            </div>
+          </>
         )}
 
         {modo === "personalizado" && (

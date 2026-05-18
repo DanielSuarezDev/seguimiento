@@ -5,8 +5,14 @@ import MarcarRevisado from "./MarcarRevisado";
 
 const tipoLabel: Record<string, string> = {
   consentimiento_informado: "Consentimiento informado",
-  evaluacion_inicial: "Evaluación inicial",
-  seguimiento_semanal: "Seguimiento semanal",
+  evaluacion_inicial: "Evaluación inicial · Adulto",
+  evaluacion_adolescente: "Evaluación inicial · Adolescente",
+  evaluacion_nino: "Evaluación inicial · Niño",
+  evaluacion_matrimonial: "Evaluación matrimonial",
+  seguimiento_semanal: "Seguimiento semanal · Adulto",
+  seguimiento_adolescente: "Seguimiento semanal · Adolescente",
+  seguimiento_nino: "Seguimiento semanal · Niño",
+  seguimiento_matrimonial: "Seguimiento semanal · Matrimonial",
   tareas_terapeuticas: "Tareas terapéuticas",
   personalizado: "Formulario personalizado",
 };
@@ -128,6 +134,139 @@ const seccionesEvaluacion: { titulo: string; campos: { key: string; label: strin
   },
 ];
 
+// --- Adolescente: evaluación ---
+const seccionesEvalAdolescente = [
+  { titulo: "Conociéndote", campos: [
+    { key: "nombre", label: "Nombre" },
+    { key: "edad", label: "Edad" },
+    { key: "colegio", label: "Colegio" },
+    { key: "curso", label: "Curso / grado" },
+    { key: "con_quien_vives", label: "Con quién vive" },
+  ]},
+  { titulo: "Cómo se ha sentido", campos: [
+    { key: "sentimientos", label: "Sentimientos marcados" },
+  ]},
+  { titulo: "Lo que está pasando", campos: [
+    { key: "mas_dificil", label: "Lo más difícil últimamente" },
+    { key: "ocupa_mente", label: "Qué ocupa más su mente" },
+    { key: "preocupacion", label: "Algo que le esté preocupando" },
+  ]},
+  { titulo: "Amigos y redes", campos: [
+    { key: "amistades", label: "Cómo se siente con sus amistades" },
+    { key: "presion_redes", label: "Presión por redes sociales / comparación" },
+    { key: "sentido_solo", label: "Se ha sentido solo" },
+  ]},
+  { titulo: "Familia", campos: [
+    { key: "relacion_padres", label: "Relación con sus padres" },
+    { key: "hablar_en_casa", label: "Puede hablar con alguien en casa" },
+  ]},
+  { titulo: "Vida espiritual", campos: [
+    { key: "espiritual", label: "Cómo se siente espiritualmente" },
+    { key: "peticion", label: "Petición de oración" },
+  ]},
+];
+
+// --- Niño: evaluación ---
+const seccionesEvalNino = [
+  { titulo: "Hola", campos: [
+    { key: "nombre", label: "Nombre" },
+    { key: "edad", label: "Edad" },
+    { key: "colegio", label: "Colegio" },
+  ]},
+  { titulo: "Cómo se ha sentido", campos: [
+    { key: "sentimiento", label: "Sentimiento elegido" },
+  ]},
+  { titulo: "Cuéntanos un poquito", campos: [
+    { key: "bonito_semana", label: "Lo más bonito de la semana" },
+    { key: "triste_bravo", label: "Qué le puso triste o bravo" },
+    { key: "miedo", label: "Algo que le dé miedo" },
+  ]},
+  { titulo: "Familia", campos: [
+    { key: "pasar_familia", label: "Le gusta pasar tiempo con la familia" },
+    { key: "relacion_padres", label: "Cómo se lleva con sus papás" },
+  ]},
+  { titulo: "Dios", campos: [
+    { key: "ora_gusta", label: "Le gusta orar" },
+    { key: "aprendio_dios", label: "Qué aprendió de Dios" },
+    { key: "peticion", label: "Por qué quiere orar" },
+  ]},
+];
+
+// --- Matrimonial: evaluación ---
+const seccionesEvalMatrimonial = [
+  { titulo: "Información básica", campos: [
+    { key: "nombre_esposo", label: "Nombre del esposo" },
+    { key: "nombre_esposa", label: "Nombre de la esposa" },
+    { key: "tiempo_casados", label: "Tiempo de casados" },
+    { key: "hijos", label: "Hijos" },
+    { key: "iglesia", label: "Iglesia" },
+  ]},
+  { titulo: "Su relación hoy", campos: [
+    { key: "describen_relacion", label: "Cómo describen su relación" },
+    { key: "detalle_matrimonio", label: "Detalle de su matrimonio (relato)" },
+    { key: "areas_ayuda", label: "Áreas en las que necesitan ayuda" },
+  ]},
+  { titulo: "Comunicación", campos: [
+    { key: "fuente_conflictos", label: "Fuente principal de conflictos" },
+    { key: "escucha_mutua", label: "Logran escucharse mutuamente" },
+    { key: "manejo_desacuerdos", label: "Cómo manejan los desacuerdos" },
+  ]},
+  { titulo: "Vida espiritual juntos", campos: [
+    { key: "oran_juntos", label: "¿Oran juntos?" },
+    { key: "dios_centro", label: "Dios en el centro de la relación" },
+  ]},
+  { titulo: "Expectativas", campos: [
+    { key: "expectativas", label: "Qué esperan del proceso" },
+    { key: "dispuestos_trabajar", label: "Dispuestos a trabajar juntos" },
+  ]},
+];
+
+// --- Adolescente: seguimiento ---
+const seccionesSegAdolescente = [
+  { titulo: "Su semana", campos: [
+    { key: "como_semana", label: "Cómo estuvo su semana (1-5)" },
+    { key: "lo_mejor", label: "Lo mejor de la semana" },
+    { key: "lo_dificil", label: "Lo más difícil" },
+    { key: "ocupo_mente", label: "Qué ocupó más su mente" },
+  ]},
+  { titulo: "Emociones", campos: [
+    { key: "emociones", label: "Emociones presentes" },
+  ]},
+  { titulo: "Caminar con Dios", campos: [
+    { key: "relacion_dios", label: "Relación con Dios esta semana" },
+    { key: "peticion", label: "Petición de oración" },
+  ]},
+];
+
+// --- Niño: seguimiento ---
+const seccionesSegNino = [
+  { titulo: "Su semana", campos: [
+    { key: "como_semana", label: "Cómo estuvo su semana" },
+    { key: "feliz", label: "Qué le hizo feliz" },
+    { key: "dificil", label: "Qué fue difícil" },
+  ]},
+  { titulo: "Dios", campos: [
+    { key: "oro", label: "¿Oró esta semana?" },
+    { key: "aprendio", label: "Qué aprendió de Dios" },
+  ]},
+];
+
+// --- Matrimonial: seguimiento ---
+const seccionesSegMatrimonial = [
+  { titulo: "Su semana juntos", campos: [
+    { key: "como_relacion", label: "Cómo estuvo la relación (1-5)" },
+    { key: "lo_mejor", label: "Lo mejor de la semana como pareja" },
+    { key: "lo_dificil", label: "Lo difícil esta semana" },
+  ]},
+  { titulo: "Comunicación y conexión", campos: [
+    { key: "conversaron_escucharon", label: "Pudieron conversar y escucharse" },
+    { key: "oracion_perdon_conexion", label: "Momentos de oración, perdón o conexión" },
+  ]},
+  { titulo: "Esta próxima semana", campos: [
+    { key: "trabajar_proxima", label: "Qué necesitan trabajar juntos" },
+  ]},
+];
+
 function formatValue(value: unknown): string {
   if (value === null || value === undefined || value === "") return "—";
   if (typeof value === "boolean") return value ? "Sí" : "No";
@@ -164,12 +303,18 @@ export default async function RespuestaPage({ params }: { params: Promise<{ id: 
   const respuestas = (data.respuestas ?? {}) as Record<string, unknown>;
   const usadas = new Set<string>();
 
-  const renderEvaluacion = data.tipo === "evaluacion_inicial";
-  const renderSeguimiento = data.tipo === "seguimiento_semanal";
-  const secciones = renderEvaluacion
-    ? seccionesEvaluacion.map((s) => ({ ...s, campos: s.campos.map((c) => ({ ...c, format: undefined as ((v: unknown) => string) | undefined })) }))
-    : renderSeguimiento ? seccionesSeguimiento
-      : [];
+  type Seccion = { titulo: string; campos: { key: string; label: string; format?: (v: unknown) => string }[] };
+  const seccionesPorTipo: Record<string, Seccion[]> = {
+    evaluacion_inicial: seccionesEvaluacion,
+    evaluacion_adolescente: seccionesEvalAdolescente,
+    evaluacion_nino: seccionesEvalNino,
+    evaluacion_matrimonial: seccionesEvalMatrimonial,
+    seguimiento_semanal: seccionesSeguimiento,
+    seguimiento_adolescente: seccionesSegAdolescente,
+    seguimiento_nino: seccionesSegNino,
+    seguimiento_matrimonial: seccionesSegMatrimonial,
+  };
+  const secciones: Seccion[] = seccionesPorTipo[data.tipo] ?? [];
   const camposExtra = Object.entries(respuestas).filter(([k]) => {
     if (secciones.length === 0) return true;
     return !secciones.some((s) => s.campos.some((c) => c.key === k));

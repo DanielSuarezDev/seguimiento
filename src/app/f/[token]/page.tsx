@@ -2,7 +2,13 @@ import { createClient } from "@/lib/supabase/server";
 import { notFound } from "next/navigation";
 import ConsentimientoForm from "@/components/formularios/ConsentimientoForm";
 import EvaluacionInicialForm from "@/components/formularios/EvaluacionInicialForm";
+import EvaluacionAdolescenteForm from "@/components/formularios/EvaluacionAdolescenteForm";
+import EvaluacionNinoForm from "@/components/formularios/EvaluacionNinoForm";
+import EvaluacionMatrimonialForm from "@/components/formularios/EvaluacionMatrimonialForm";
 import SeguimientoSemanalForm from "@/components/formularios/SeguimientoSemanalForm";
+import SeguimientoAdolescenteForm from "@/components/formularios/SeguimientoAdolescenteForm";
+import SeguimientoNinoForm from "@/components/formularios/SeguimientoNinoForm";
+import SeguimientoMatrimonialForm from "@/components/formularios/SeguimientoMatrimonialForm";
 import TareasTerapeuticasForm from "@/components/formularios/TareasTerapeuticasForm";
 import FormularioPersonalizado from "@/components/formularios/FormularioPersonalizado";
 import type { Pregunta } from "@/components/formularios/FormularioPersonalizado";
@@ -53,7 +59,13 @@ export default async function FormularioPublicoPage({ params }: { params: Promis
   const tipoLabel: Record<string, string> = {
     consentimiento_informado: "Consentimiento informado",
     evaluacion_inicial: "Evaluación inicial",
+    evaluacion_adolescente: "Evaluación inicial",
+    evaluacion_nino: "Evaluación inicial",
+    evaluacion_matrimonial: "Evaluación matrimonial",
     seguimiento_semanal: "Seguimiento semanal",
+    seguimiento_adolescente: "Seguimiento semanal",
+    seguimiento_nino: "Seguimiento semanal",
+    seguimiento_matrimonial: "Seguimiento semanal",
     tareas_terapeuticas: "Tareas terapéuticas",
     personalizado: "",
   };
@@ -89,7 +101,17 @@ export default async function FormularioPublicoPage({ params }: { params: Promis
     tareasPersona = data ?? [];
   }
 
-  const ocultarHeader = tokenData.tipo === "evaluacion_inicial";
+  const tiposConHeaderPropio = new Set([
+    "evaluacion_inicial",
+    "evaluacion_adolescente",
+    "evaluacion_nino",
+    "evaluacion_matrimonial",
+    "seguimiento_semanal",
+    "seguimiento_adolescente",
+    "seguimiento_nino",
+    "seguimiento_matrimonial",
+  ]);
+  const ocultarHeader = tiposConHeaderPropio.has(tokenData.tipo ?? "");
 
   return (
     <div>
@@ -106,7 +128,13 @@ export default async function FormularioPublicoPage({ params }: { params: Promis
       {esPersonalizado && <FormularioPersonalizado {...props} preguntas={preguntasPersonalizado} />}
       {tokenData.tipo === "consentimiento_informado" && <ConsentimientoForm {...props} />}
       {tokenData.tipo === "evaluacion_inicial" && <EvaluacionInicialForm {...props} />}
+      {tokenData.tipo === "evaluacion_adolescente" && <EvaluacionAdolescenteForm {...props} />}
+      {tokenData.tipo === "evaluacion_nino" && <EvaluacionNinoForm {...props} />}
+      {tokenData.tipo === "evaluacion_matrimonial" && <EvaluacionMatrimonialForm {...props} />}
       {tokenData.tipo === "seguimiento_semanal" && <SeguimientoSemanalForm {...props} />}
+      {tokenData.tipo === "seguimiento_adolescente" && <SeguimientoAdolescenteForm {...props} />}
+      {tokenData.tipo === "seguimiento_nino" && <SeguimientoNinoForm {...props} />}
+      {tokenData.tipo === "seguimiento_matrimonial" && <SeguimientoMatrimonialForm {...props} />}
       {tokenData.tipo === "tareas_terapeuticas" && <TareasTerapeuticasForm {...props} tareas={tareasPersona} />}
     </div>
   );

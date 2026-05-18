@@ -4,8 +4,14 @@ import EliminarFormulario from "./EliminarFormulario";
 
 const tipoLabel: Record<string, string> = {
   consentimiento_informado: "Consentimiento informado",
-  evaluacion_inicial: "Evaluación inicial",
-  seguimiento_semanal: "Seguimiento semanal",
+  evaluacion_inicial: "Evaluación inicial · Adulto",
+  evaluacion_adolescente: "Evaluación inicial · Adolescente",
+  evaluacion_nino: "Evaluación inicial · Niño",
+  evaluacion_matrimonial: "Evaluación matrimonial",
+  seguimiento_semanal: "Seguimiento semanal · Adulto",
+  seguimiento_adolescente: "Seguimiento semanal · Adolescente",
+  seguimiento_nino: "Seguimiento semanal · Niño",
+  seguimiento_matrimonial: "Seguimiento semanal · Matrimonial",
   tareas_terapeuticas: "Tareas terapéuticas",
   personalizado: "Formulario personalizado",
 };
