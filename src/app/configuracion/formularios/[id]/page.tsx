@@ -221,7 +221,7 @@ export default function EditarPlantillaPage({ params }: { params: Promise<{ id: 
         <form onSubmit={agregarPregunta} className="bg-white border border-amber-200 rounded-xl p-5 space-y-4">
           <h3 className="text-sm font-semibold text-stone-700">Nueva pregunta</h3>
 
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
               <label className="label">Tipo de respuesta</label>
               <select value={form.tipo} onChange={(e) => setForm((p) => ({ ...p, tipo: e.target.value }))} className="input">

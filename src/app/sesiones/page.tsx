@@ -72,14 +72,14 @@ export default async function SesionesPage({
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-6">
         <div>
           <h1 className="text-2xl font-semibold text-stone-800">Sesiones</h1>
           <p className="text-stone-500 mt-1">Historial y agenda de sesiones de consejería.</p>
         </div>
         <Link
           href="/sesiones/nueva"
-          className="bg-amber-700 hover:bg-amber-800 text-white text-sm font-medium px-4 py-2.5 rounded-xl transition-colors shadow-sm"
+          className="bg-amber-700 hover:bg-amber-800 text-white text-sm font-medium px-4 py-2.5 rounded-xl transition-colors shadow-sm self-start sm:self-auto"
         >
           + Nueva sesión
         </Link>

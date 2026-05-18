@@ -62,7 +62,7 @@ export default function NuevaPersonaPage() {
         {/* Datos personales */}
         <div className="bg-white border border-stone-200 rounded-xl p-6 space-y-4">
           <h2 className="text-sm font-semibold text-stone-500 uppercase tracking-wide">Datos personales</h2>
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div><label className="label">Nombre *</label><input name="nombre" value={form.nombre} onChange={handleChange} required className="input" /></div>
             <div><label className="label">Apellido *</label><input name="apellido" value={form.apellido} onChange={handleChange} required className="input" /></div>
             <div><label className="label">Teléfono</label><input name="telefono" value={form.telefono} onChange={handleChange} type="tel" className="input" /></div>
@@ -85,7 +85,7 @@ export default function NuevaPersonaPage() {
         {/* Contexto de consejería */}
         <div className="bg-white border border-stone-200 rounded-xl p-6 space-y-4">
           <h2 className="text-sm font-semibold text-stone-500 uppercase tracking-wide">Consejería</h2>
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label className="label">Tipo de consejería</label>
               <select name="tipo_consejeria_id" value={form.tipo_consejeria_id} onChange={handleChange} className="input">

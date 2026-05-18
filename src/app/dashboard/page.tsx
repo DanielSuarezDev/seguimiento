@@ -66,7 +66,7 @@ export default async function DashboardPage() {
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-4 gap-4 mb-7">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 mb-7">
         {stats.map((s) => (
           <div key={s.label} className="bg-white border border-stone-200 rounded-xl p-5">
             <div className={`w-9 h-9 rounded-lg flex items-center justify-center text-lg mb-3 ${s.color}`}>{s.icon}</div>
@@ -76,10 +76,10 @@ export default async function DashboardPage() {
         ))}
       </div>
 
-      <div className="grid grid-cols-3 gap-5">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
 
         {/* Columna izquierda: actividad del día */}
-        <div className="col-span-2 space-y-5">
+        <div className="lg:col-span-2 space-y-5">
 
           {/* Hoy */}
           <div className="bg-white border border-stone-200 rounded-xl p-5">
@@ -128,7 +128,7 @@ export default async function DashboardPage() {
                 <p className="text-sm">No hay sesiones próximas programadas</p>
               </div>
             ) : (
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 {proximasSesiones.map((s) => {
                   const p = Array.isArray(s.personas) ? s.personas[0] : s.personas;
                   return (

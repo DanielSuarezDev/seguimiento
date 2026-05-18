@@ -75,9 +75,9 @@ export default async function AgendaPage({ searchParams }: { searchParams: Promi
         </Link>
       </div>
 
-      <div className="grid grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Calendario */}
-        <div className="col-span-2 bg-white border border-stone-200 rounded-xl overflow-hidden">
+        <div className="lg:col-span-2 bg-white border border-stone-200 rounded-xl overflow-hidden">
           {/* Header mes */}
           <div className="flex items-center justify-between px-5 py-4 border-b border-stone-100">
             <Link href={`/agenda?mes=${prevMonth.mes}&año=${prevMonth.año}`} className="text-stone-400 hover:text-stone-600 transition-colors px-2 py-1 rounded">←</Link>
@@ -99,7 +99,7 @@ export default async function AgendaPage({ searchParams }: { searchParams: Promi
               const hasSesiones = day && sesionesMap[day]?.length;
               const hasTareas = day && tareasMap[day]?.length;
               return (
-                <div key={idx} className={`min-h-[80px] p-1.5 border-b border-r border-stone-50 ${!day ? "bg-stone-50/50" : ""}`}>
+                <div key={idx} className={`min-h-[60px] sm:min-h-[80px] p-1 sm:p-1.5 border-b border-r border-stone-50 ${!day ? "bg-stone-50/50" : ""}`}>
                   {day && (
                     <>
                       <div className={`w-6 h-6 flex items-center justify-center text-xs font-medium rounded-full mb-1 ${isHoy ? "bg-amber-600 text-white" : "text-stone-600"}`}>

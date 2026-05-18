@@ -74,7 +74,7 @@ function NuevaTareaForm() {
         <label className="label">Versículos de referencia</label>
         <input name="versiculos_referencia" value={form.versiculos_referencia} onChange={handleChange} className="input" placeholder="Ej: Salmos 23, Filipenses 4:6-7" />
       </div>
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div><label className="label">Fecha de asignación</label><input name="fecha_asignacion" value={form.fecha_asignacion} onChange={handleChange} type="date" className="input" /></div>
         <div><label className="label">Fecha de vencimiento</label><input name="fecha_vencimiento" value={form.fecha_vencimiento} onChange={handleChange} type="date" className="input" /></div>
       </div>

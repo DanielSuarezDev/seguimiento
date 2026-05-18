@@ -180,7 +180,7 @@ function NuevoFormularioForm() {
               <p className="text-xs text-stone-400 mb-3">
                 Cada etapa de vida tiene preguntas, lenguaje y experiencia diferentes.
               </p>
-              <div className="grid grid-cols-2 gap-2.5">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                 {audiencias.map((a) => (
                   <button
                     key={a.value}
@@ -263,10 +263,10 @@ function NuevoFormularioForm() {
 export default function NuevoFormularioPage() {
   return (
     <div className="max-w-xl">
-      <div className="flex items-center justify-between mb-7">
-        <div className="flex items-center gap-3">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-7">
+        <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
           <Link href="/formularios" className="text-stone-400 hover:text-stone-600 text-sm">← Formularios</Link>
-          <span className="text-stone-300">/</span>
+          <span className="text-stone-300 hidden sm:inline">/</span>
           <h1 className="text-xl font-semibold text-stone-800">Enviar formulario</h1>
         </div>
         <Link href="/configuracion/formularios" className="text-sm text-amber-700 hover:text-amber-800 font-medium">

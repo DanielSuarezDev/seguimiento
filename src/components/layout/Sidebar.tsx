@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 
 const navItems = [
@@ -18,6 +19,19 @@ export default function Sidebar() {
   const pathname = usePathname();
   const router = useRouter();
   const supabase = createClient();
+  const [open, setOpen] = useState(false);
+
+  // Cerrar drawer al navegar
+  useEffect(() => { setOpen(false); }, [pathname]);
+
+  // Bloquear scroll del body cuando el drawer está abierto
+  useEffect(() => {
+    if (open) {
+      const prev = document.body.style.overflow;
+      document.body.style.overflow = "hidden";
+      return () => { document.body.style.overflow = prev; };
+    }
+  }, [open]);
 
   async function handleSignOut() {
     await supabase.auth.signOut();
@@ -27,8 +41,8 @@ export default function Sidebar() {
 
   const enConfiguracion = pathname.startsWith("/configuracion");
 
-  return (
-    <aside className="w-56 bg-white border-r border-stone-200 flex flex-col h-screen sticky top-0 shrink-0">
+  const nav = (
+    <>
       <div className="px-5 py-5 border-b border-stone-100">
         <div className="flex items-center gap-2.5">
           <span className="text-xl">✝️</span>
@@ -60,7 +74,6 @@ export default function Sidebar() {
           );
         })}
 
-        {/* Configuración con sub-items */}
         <div className="pt-1">
           <Link
             href="/configuracion/tipos-consejeria"
@@ -103,6 +116,59 @@ export default function Sidebar() {
           Cerrar sesión
         </button>
       </div>
-    </aside>
+    </>
+  );
+
+  return (
+    <>
+      {/* Barra superior móvil */}
+      <div className="md:hidden fixed top-0 left-0 right-0 z-30 h-14 bg-white border-b border-stone-200 flex items-center justify-between px-4">
+        <button
+          onClick={() => setOpen(true)}
+          aria-label="Abrir menú"
+          className="p-2 -ml-2 text-stone-600 hover:text-stone-900"
+        >
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+            <line x1="3" y1="6" x2="21" y2="6" />
+            <line x1="3" y1="12" x2="21" y2="12" />
+            <line x1="3" y1="18" x2="21" y2="18" />
+          </svg>
+        </button>
+        <div className="flex items-center gap-2">
+          <span>✝️</span>
+          <span className="font-semibold text-stone-800 text-sm">Seguimiento</span>
+        </div>
+        <div className="w-9" />
+      </div>
+
+      {/* Sidebar desktop */}
+      <aside className="hidden md:flex w-56 bg-white border-r border-stone-200 flex-col h-screen sticky top-0 shrink-0">
+        {nav}
+      </aside>
+
+      {/* Drawer móvil */}
+      {open && (
+        <div className="md:hidden fixed inset-0 z-50 flex">
+          <div
+            className="absolute inset-0 bg-stone-900/40"
+            onClick={() => setOpen(false)}
+            aria-hidden="true"
+          />
+          <aside className="relative w-64 max-w-[80vw] bg-white border-r border-stone-200 flex flex-col h-full shadow-xl">
+            <button
+              onClick={() => setOpen(false)}
+              aria-label="Cerrar menú"
+              className="absolute top-3 right-3 p-1.5 text-stone-400 hover:text-stone-700"
+            >
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+                <line x1="6" y1="6" x2="18" y2="18" />
+                <line x1="6" y1="18" x2="18" y2="6" />
+              </svg>
+            </button>
+            {nav}
+          </aside>
+        </div>
+      )}
+    </>
   );
 }
