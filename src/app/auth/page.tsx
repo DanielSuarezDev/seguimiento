@@ -9,7 +9,6 @@ export default function AuthPage() {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [mode, setMode] = useState<"login" | "register">("login");
   const router = useRouter();
   const supabase = createClient();
 
@@ -18,13 +17,10 @@ export default function AuthPage() {
     setLoading(true);
     setError(null);
 
-    const { error } =
-      mode === "login"
-        ? await supabase.auth.signInWithPassword({ email, password })
-        : await supabase.auth.signUp({ email, password });
+    const { error } = await supabase.auth.signInWithPassword({ email, password });
 
     if (error) {
-      setError(error.message);
+      setError("Correo o contraseña incorrectos.");
     } else {
       router.push("/dashboard");
       router.refresh();
@@ -42,9 +38,7 @@ export default function AuthPage() {
         </div>
 
         <div className="bg-white rounded-2xl shadow-sm border border-stone-200 p-8">
-          <h2 className="text-lg font-medium text-stone-700 mb-6">
-            {mode === "login" ? "Iniciar sesión" : "Crear cuenta"}
-          </h2>
+          <h2 className="text-lg font-medium text-stone-700 mb-6">Iniciar sesión</h2>
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
@@ -83,16 +77,9 @@ export default function AuthPage() {
               disabled={loading}
               className="w-full bg-amber-700 hover:bg-amber-800 disabled:opacity-50 text-white font-medium py-2.5 rounded-lg text-sm transition-colors"
             >
-              {loading ? "Cargando..." : mode === "login" ? "Entrar" : "Registrarse"}
+              {loading ? "Cargando..." : "Entrar"}
             </button>
           </form>
-
-          <button
-            onClick={() => setMode(mode === "login" ? "register" : "login")}
-            className="w-full text-center text-sm text-stone-500 hover:text-stone-700 mt-4 transition-colors"
-          >
-            {mode === "login" ? "¿No tienes cuenta? Regístrate" : "¿Ya tienes cuenta? Inicia sesión"}
-          </button>
         </div>
       </div>
     </div>
