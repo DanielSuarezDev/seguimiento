@@ -29,8 +29,11 @@ export async function proxy(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser();
 
-  const isAuthPage = request.nextUrl.pathname.startsWith("/auth");
-  const isProtected = !isAuthPage && request.nextUrl.pathname !== "/";
+  const { pathname } = request.nextUrl;
+  const isAuthPage = pathname.startsWith("/auth");
+  const isPublicForm = pathname.startsWith("/f/");
+  const isApiPublic = pathname.startsWith("/api/formularios/responder");
+  const isProtected = !isAuthPage && !isPublicForm && !isApiPublic && pathname !== "/";
 
   if (isProtected && !user) {
     return NextResponse.redirect(new URL("/auth", request.url));

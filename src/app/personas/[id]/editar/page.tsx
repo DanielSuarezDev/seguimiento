@@ -1,40 +1,57 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, use } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import type { TipoConsejeria } from "@/types/database";
 
-export default function NuevaPersonaPage() {
+export default function EditarPersonaPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = use(params);
   const router = useRouter();
   const supabase = createClient();
   const [loading, setLoading] = useState(false);
+  const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [tipos, setTipos] = useState<TipoConsejeria[]>([]);
-
   const [form, setForm] = useState({
     nombre: "", apellido: "", telefono: "", email: "",
     fecha_nacimiento: "", estado_civil: "", tipo_consejeria_id: "",
-    ocupacion: "", iglesia: "", motivo_inicial: "", notas_generales: "",
+    ocupacion: "", iglesia: "", motivo_inicial: "", notas_generales: "", activo: true,
   });
 
   useEffect(() => {
-    supabase.from("tipos_consejeria").select("*").then(({ data }) => setTipos(data ?? []));
+    setLoading(true);
+    Promise.all([
+      supabase.from("tipos_consejeria").select("*"),
+      supabase.from("personas").select("*").eq("id", id).single(),
+    ]).then(([{ data: t }, { data: p }]) => {
+      setTipos(t ?? []);
+      if (p) setForm({
+        nombre: p.nombre ?? "", apellido: p.apellido ?? "",
+        telefono: p.telefono ?? "", email: p.email ?? "",
+        fecha_nacimiento: p.fecha_nacimiento ?? "",
+        estado_civil: p.estado_civil ?? "",
+        tipo_consejeria_id: p.tipo_consejeria_id ?? "",
+        ocupacion: p.ocupacion ?? "", iglesia: p.iglesia ?? "",
+        motivo_inicial: p.motivo_inicial ?? "",
+        notas_generales: p.notas_generales ?? "",
+        activo: p.activo,
+      });
+      setLoading(false);
+    });
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [id]);
 
   function handleChange(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) {
-    setForm((p) => ({ ...p, [e.target.name]: e.target.value }));
+    const { name, value, type } = e.target;
+    setForm((p) => ({ ...p, [name]: type === "checkbox" ? (e.target as HTMLInputElement).checked : value }));
   }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    setLoading(true); setError(null);
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) { router.push("/auth"); return; }
-
-    const { data, error } = await supabase.from("personas").insert({
+    setSaving(true); setError(null);
+    const { error } = await supabase.from("personas").update({
       nombre: form.nombre, apellido: form.apellido,
       telefono: form.telefono || null, email: form.email || null,
       fecha_nacimiento: form.fecha_nacimiento || null,
@@ -43,23 +60,24 @@ export default function NuevaPersonaPage() {
       ocupacion: form.ocupacion || null, iglesia: form.iglesia || null,
       motivo_inicial: form.motivo_inicial || null,
       notas_generales: form.notas_generales || null,
-      activo: true, user_id: user.id,
-    }).select("id").single();
+      activo: form.activo,
+    }).eq("id", id);
 
-    if (error) { setError(error.message); setLoading(false); }
-    else router.push(`/personas/${data.id}`);
+    if (error) { setError(error.message); setSaving(false); }
+    else router.push(`/personas/${id}`);
   }
+
+  if (loading) return <div className="text-stone-400 text-sm">Cargando...</div>;
 
   return (
     <div className="max-w-2xl">
       <div className="flex items-center gap-3 mb-7">
-        <Link href="/personas" className="text-stone-400 hover:text-stone-600 text-sm">← Personas</Link>
+        <Link href={`/personas/${id}`} className="text-stone-400 hover:text-stone-600 text-sm">← Perfil</Link>
         <span className="text-stone-300">/</span>
-        <h1 className="text-xl font-semibold text-stone-800">Nueva persona</h1>
+        <h1 className="text-xl font-semibold text-stone-800">Editar persona</h1>
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-6">
-        {/* Datos personales */}
         <div className="bg-white border border-stone-200 rounded-xl p-6 space-y-4">
           <h2 className="text-sm font-semibold text-stone-500 uppercase tracking-wide">Datos personales</h2>
           <div className="grid grid-cols-2 gap-4">
@@ -82,7 +100,6 @@ export default function NuevaPersonaPage() {
           </div>
         </div>
 
-        {/* Contexto de consejería */}
         <div className="bg-white border border-stone-200 rounded-xl p-6 space-y-4">
           <h2 className="text-sm font-semibold text-stone-500 uppercase tracking-wide">Consejería</h2>
           <div className="grid grid-cols-2 gap-4">
@@ -96,17 +113,20 @@ export default function NuevaPersonaPage() {
             <div><label className="label">Ocupación</label><input name="ocupacion" value={form.ocupacion} onChange={handleChange} className="input" /></div>
             <div className="col-span-2"><label className="label">Iglesia / Comunidad</label><input name="iglesia" value={form.iglesia} onChange={handleChange} className="input" /></div>
           </div>
-          <div><label className="label">Motivo inicial de consulta</label><textarea name="motivo_inicial" value={form.motivo_inicial} onChange={handleChange} rows={3} placeholder="¿Por qué busca consejería?" className="input resize-none" /></div>
-          <div><label className="label">Notas generales</label><textarea name="notas_generales" value={form.notas_generales} onChange={handleChange} rows={2} placeholder="Observaciones adicionales..." className="input resize-none" /></div>
+          <div><label className="label">Motivo inicial</label><textarea name="motivo_inicial" value={form.motivo_inicial} onChange={handleChange} rows={3} className="input resize-none" /></div>
+          <div><label className="label">Notas generales</label><textarea name="notas_generales" value={form.notas_generales} onChange={handleChange} rows={2} className="input resize-none" /></div>
+          <div className="flex items-center gap-3 pt-1">
+            <input type="checkbox" name="activo" id="activo" checked={form.activo} onChange={handleChange} className="w-4 h-4 accent-amber-700" />
+            <label htmlFor="activo" className="text-sm text-stone-600">Persona activa</label>
+          </div>
         </div>
 
         {error && <p className="text-red-500 text-sm bg-red-50 px-3 py-2 rounded-lg">{error}</p>}
-
         <div className="flex gap-3">
-          <button type="submit" disabled={loading} className="bg-amber-700 hover:bg-amber-800 disabled:opacity-50 text-white text-sm font-medium px-5 py-2.5 rounded-lg transition-colors">
-            {loading ? "Guardando..." : "Guardar persona"}
+          <button type="submit" disabled={saving} className="bg-amber-700 hover:bg-amber-800 disabled:opacity-50 text-white text-sm font-medium px-5 py-2.5 rounded-lg transition-colors">
+            {saving ? "Guardando..." : "Guardar cambios"}
           </button>
-          <Link href="/personas" className="bg-white border border-stone-300 hover:border-stone-400 text-stone-600 text-sm font-medium px-5 py-2.5 rounded-lg transition-colors">
+          <Link href={`/personas/${id}`} className="bg-white border border-stone-300 text-stone-600 text-sm font-medium px-5 py-2.5 rounded-lg transition-colors">
             Cancelar
           </Link>
         </div>
