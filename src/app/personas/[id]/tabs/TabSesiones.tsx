@@ -142,9 +142,14 @@ export default async function TabSesiones({
       ) : (
         <div className="space-y-2">
           {filtradas.map((s) => {
-            const titulo = s.objetivo_principal ?? s.objetivos_sesion;
-            const fallback = s.situacion_presentada ?? s.motivo_consulta;
+            const titulo = s.objetivo_principal ?? s.objetivos_sesion ?? s.situacion_presentada ?? s.motivo_consulta;
             const progreso = s.evaluacion_progreso ? progresoLabel[s.evaluacion_progreso] : null;
+            const duracion = duracionTexto(s.hora_inicio, s.hora_fin);
+            const fecha = new Date(s.fecha + "T00:00:00").toLocaleDateString("es", { weekday: "short", day: "numeric", month: "short", year: "numeric" });
+            const partes = [fecha];
+            if (s.hora_inicio) partes.push(s.hora_inicio.slice(0, 5));
+            if (duracion) partes.push(duracion);
+
             return (
               <Link
                 key={s.id}
@@ -157,14 +162,14 @@ export default async function TabSesiones({
                       {s.numero_sesion}
                     </div>
                     <div className="min-w-0">
-                      <p className="text-sm font-medium text-stone-700">
-                        {new Date(s.fecha + "T00:00:00").toLocaleDateString("es", { weekday: "short", day: "numeric", month: "short", year: "numeric" })}
-                        {s.hora_inicio && ` · ${s.hora_inicio.slice(0, 5)}`}
+                      <p className="text-sm font-medium text-stone-800 line-clamp-2">
+                        {titulo || `Sesión #${s.numero_sesion}`}
                       </p>
-                      {titulo && <p className="text-xs text-stone-500 mt-0.5 line-clamp-1">{titulo}</p>}
-                      {!titulo && fallback && <p className="text-xs text-stone-400 mt-0.5 line-clamp-1">{fallback}</p>}
+                      <p className="text-xs text-stone-400 mt-1">
+                        {partes.join(" · ")}
+                      </p>
                       {progreso && (
-                        <span className="inline-block mt-1.5 text-xs px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700">
+                        <span className="inline-block mt-2 text-xs px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700">
                           {progreso}
                         </span>
                       )}

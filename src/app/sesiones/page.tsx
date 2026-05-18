@@ -29,9 +29,21 @@ const TABS: { key: TabKey; label: string; estados: string[] }[] = [
 
 type SesionItem = {
   id: string; numero_sesion: number; fecha: string; estado: string;
+  hora_inicio: string | null; hora_fin: string | null;
   motivo_consulta: string | null; objetivo_principal: string | null;
+  situacion_presentada: string | null; objetivos_sesion: string | null;
   personas: { nombre: string; apellido: string } | { nombre: string; apellido: string }[] | null;
 };
+
+function duracionTexto(inicio: string | null, fin: string | null) {
+  if (!inicio || !fin) return null;
+  const [hi, mi] = inicio.split(":").map(Number);
+  const [hf, mf] = fin.split(":").map(Number);
+  let total = hf * 60 + mf - (hi * 60 + mi);
+  if (total <= 0) return null;
+  const h = Math.floor(total / 60), m = total % 60;
+  return h > 0 ? `${h}h${m ? ` ${m}min` : ""}` : `${m} min`;
+}
 
 export default async function SesionesPage({
   searchParams,
@@ -42,7 +54,7 @@ export default async function SesionesPage({
 
   const { data: rawSesiones } = await supabase
     .from("sesiones")
-    .select("id, numero_sesion, fecha, estado, motivo_consulta, objetivo_principal, personas(nombre, apellido)")
+    .select("id, numero_sesion, fecha, estado, hora_inicio, hora_fin, motivo_consulta, objetivo_principal, situacion_presentada, objetivos_sesion, personas(nombre, apellido)")
     .order("fecha", { ascending: false });
 
   const sesiones = (rawSesiones as SesionItem[] | null) ?? [];
@@ -130,36 +142,40 @@ export default async function SesionesPage({
         <div className="bg-white border border-stone-200 rounded-2xl overflow-hidden">
           {filtradas.map((sesion, i) => {
             const persona = Array.isArray(sesion.personas) ? sesion.personas[0] : sesion.personas;
-            const subtitulo = sesion.objetivo_principal ?? sesion.motivo_consulta ?? "Sin objetivo registrado";
+            const titulo =
+              sesion.objetivo_principal ??
+              sesion.objetivos_sesion ??
+              sesion.situacion_presentada ??
+              sesion.motivo_consulta ??
+              `Sesión #${sesion.numero_sesion}`;
+            const duracion = duracionTexto(sesion.hora_inicio, sesion.hora_fin);
+            const fecha = new Date(sesion.fecha + "T00:00:00").toLocaleDateString("es", {
+              weekday: "short", day: "numeric", month: "short", year: "numeric",
+            });
+            const partes = [fecha];
+            if (sesion.hora_inicio) partes.push(sesion.hora_inicio.slice(0, 5));
+            if (duracion) partes.push(duracion);
+
             return (
               <Link
                 key={sesion.id}
                 href={`/sesiones/${sesion.id}`}
-                className={`flex items-center justify-between p-5 hover:bg-stone-50 transition-colors ${i > 0 ? "border-t border-stone-100" : ""}`}
+                className={`flex items-start justify-between gap-4 p-5 hover:bg-stone-50 transition-colors ${i > 0 ? "border-t border-stone-100" : ""}`}
               >
-                <div className="flex items-center gap-4 min-w-0">
+                <div className="flex items-start gap-4 min-w-0">
                   <div className="w-10 h-10 bg-amber-100 rounded-full flex items-center justify-center text-sm font-semibold text-amber-800 shrink-0">
                     {persona?.nombre?.[0] ?? "?"}
                   </div>
                   <div className="min-w-0">
-                    <p className="font-medium text-stone-800 truncate">
-                      {persona ? `${persona.nombre} ${persona.apellido}` : "Desconocido"}
-                    </p>
-                    <p className="text-xs text-stone-400 truncate">
-                      Sesión #{sesion.numero_sesion} · {subtitulo.slice(0, 70)}
+                    <p className="font-medium text-stone-800 line-clamp-2">{titulo}</p>
+                    <p className="text-xs text-stone-400 mt-1">
+                      {persona ? `${persona.nombre} ${persona.apellido} · ` : ""}{partes.join(" · ")}
                     </p>
                   </div>
                 </div>
-                <div className="flex items-center gap-4 shrink-0">
-                  <span className={`text-xs px-2 py-1 rounded-full ${estadoColor[sesion.estado]}`}>
-                    {estadoLabel[sesion.estado] ?? sesion.estado}
-                  </span>
-                  <span className="text-sm text-stone-400 min-w-[90px] text-right">
-                    {new Date(sesion.fecha + "T00:00:00").toLocaleDateString("es", {
-                      day: "numeric", month: "short", year: "numeric",
-                    })}
-                  </span>
-                </div>
+                <span className={`text-xs px-2 py-1 rounded-full shrink-0 ${estadoColor[sesion.estado]}`}>
+                  {estadoLabel[sesion.estado] ?? sesion.estado}
+                </span>
               </Link>
             );
           })}
