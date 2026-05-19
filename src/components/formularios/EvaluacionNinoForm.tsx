@@ -1,7 +1,8 @@
 "use client";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { responderFormulario } from "@/app/f/[token]/actions";
+import PreguntasHistorial, { type HistorialHandle } from "./PreguntasHistorial";
 
 interface Props { tokenId: string; token: string; personaId: string; nombrePersona: string }
 
@@ -30,10 +31,11 @@ const emojisFamilia = [
   { e: "😢", l: "Mal" },
 ];
 
-const TOTAL = 5;
+const TOTAL = 6;
 
 export default function EvaluacionNinoForm({ tokenId, token, personaId, nombrePersona }: Props) {
   const router = useRouter();
+  const historialRef = useRef<HistorialHandle>(null);
   const [paso, setPaso] = useState(1);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -67,7 +69,7 @@ export default function EvaluacionNinoForm({ tokenId, token, personaId, nombrePe
     const r = await responderFormulario({
       token, tokenId, personaId,
       tipo: "evaluacion_nino",
-      respuestas: { ...form },
+      respuestas: { ...form, historial: historialRef.current?.getValues() },
     });
     if (r.ok) router.push(`/f/${token}/enviado`);
     else { setError(r.error); setLoading(false); }
@@ -155,6 +157,12 @@ export default function EvaluacionNinoForm({ tokenId, token, personaId, nombrePe
               value={form.ora_gusta} onChange={(v) => set("ora_gusta", v)} />
             <BigTextarea label="¿Qué aprendiste de Dios últimamente?" value={form.aprendio_dios} onChange={(v) => set("aprendio_dios", v)} />
             <BigTextarea label="¿Hay algo por lo que quieras orar?" value={form.peticion} onChange={(v) => set("peticion", v)} />
+          </Section>
+        )}
+
+        {paso === 6 && (
+          <Section title="Un poco más sobre tu familia" emoji="📜" subtitle="Pídele ayuda a un adulto si necesitas.">
+            <PreguntasHistorial ref={historialRef} accent="sky" title="" subtitle="" />
           </Section>
         )}
 

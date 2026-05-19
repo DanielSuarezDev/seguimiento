@@ -1,12 +1,14 @@
 "use client";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { responderFormulario } from "@/app/f/[token]/actions";
+import PreguntasHistorial, { type HistorialHandle } from "./PreguntasHistorial";
 
 interface Props { tokenId: string; token: string; personaId: string; nombrePersona: string; }
 
 export default function ConsentimientoForm({ tokenId, token, personaId, nombrePersona }: Props) {
   const router = useRouter();
+  const historialRef = useRef<HistorialHandle>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [form, setForm] = useState({
@@ -28,7 +30,7 @@ export default function ConsentimientoForm({ tokenId, token, personaId, nombrePe
     const result = await responderFormulario({
       token, tokenId, personaId,
       tipo: "consentimiento_informado",
-      respuestas: { ...form, fecha: new Date().toISOString().split("T")[0] },
+      respuestas: { ...form, fecha: new Date().toISOString().split("T")[0], historial: historialRef.current?.getValues() },
     });
     if (result.ok) router.push(`/f/${token}/enviado`);
     else { setError(result.error); setLoading(false); }
@@ -70,6 +72,8 @@ export default function ConsentimientoForm({ tokenId, token, personaId, nombrePe
           <textarea value={form.comentarios} onChange={(e) => setForm((p) => ({ ...p, comentarios: e.target.value }))} rows={3} className="input resize-none" placeholder="¿Alguna pregunta o comentario antes de iniciar?" />
         </div>
       </div>
+
+      <PreguntasHistorial ref={historialRef} accent="amber" />
 
       {error && <p className="text-red-500 text-sm bg-red-50 px-4 py-3 rounded-lg">{error}</p>}
       <button type="submit" disabled={loading} className="w-full bg-amber-700 hover:bg-amber-800 disabled:opacity-50 text-white font-medium py-3 rounded-xl transition-colors">

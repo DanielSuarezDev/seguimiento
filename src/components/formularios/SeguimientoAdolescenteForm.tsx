@@ -1,7 +1,8 @@
 "use client";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { responderFormulario } from "@/app/f/[token]/actions";
+import PreguntasHistorial, { type HistorialHandle } from "./PreguntasHistorial";
 
 interface Props { tokenId: string; token: string; personaId: string; nombrePersona: string }
 
@@ -39,6 +40,7 @@ const diosOpts = ["Cerca de Dios", "Más o menos", "Lejos", "Quiero acercarme m�
 
 export default function SeguimientoAdolescenteForm({ tokenId, token, personaId }: Props) {
   const router = useRouter();
+  const historialRef = useRef<HistorialHandle>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [form, setForm] = useState<FormData>({
@@ -58,7 +60,7 @@ export default function SeguimientoAdolescenteForm({ tokenId, token, personaId }
     const r = await responderFormulario({
       token, tokenId, personaId,
       tipo: "seguimiento_adolescente",
-      respuestas: { ...form },
+      respuestas: { ...form, historial: historialRef.current?.getValues() },
     });
     if (r.ok) router.push(`/f/${token}/enviado`);
     else { setError(r.error); setLoading(false); }
@@ -124,6 +126,8 @@ export default function SeguimientoAdolescenteForm({ tokenId, token, personaId }
         </div>
         <Textarea label="¿Hay algo por lo que quisieras oración?" value={form.peticion} onChange={(v) => set("peticion", v)} />
       </Card>
+
+      <PreguntasHistorial ref={historialRef} accent="violet" />
 
       {error && <p className="text-sm bg-amber-50 border border-amber-200 text-amber-800 px-4 py-3 rounded-xl">{error}</p>}
 

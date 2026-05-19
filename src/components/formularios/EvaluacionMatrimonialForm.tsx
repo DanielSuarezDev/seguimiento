@@ -1,7 +1,8 @@
 "use client";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { responderFormulario } from "@/app/f/[token]/actions";
+import PreguntasHistorial, { type HistorialHandle } from "./PreguntasHistorial";
 
 interface Props { tokenId: string; token: string; personaId: string; nombrePersona: string }
 
@@ -30,10 +31,12 @@ const escuchaOpts = ["Sí, generalmente", "A veces", "Nos cuesta mucho", "No"];
 const oranOpts = ["Sí, regularmente", "A veces", "Rara vez", "No"];
 const diosCentroOpts = ["Sí", "Queremos crecer", "Nos cuesta", "No actualmente"];
 
-const TOTAL = 6;
+const TOTAL = 7;
 
 export default function EvaluacionMatrimonialForm({ tokenId, token, personaId, nombrePersona }: Props) {
   const router = useRouter();
+  const historialEsposoRef = useRef<HistorialHandle>(null);
+  const historialEsposaRef = useRef<HistorialHandle>(null);
   const [paso, setPaso] = useState(1);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -83,7 +86,11 @@ export default function EvaluacionMatrimonialForm({ tokenId, token, personaId, n
     const r = await responderFormulario({
       token, tokenId, personaId,
       tipo: "evaluacion_matrimonial",
-      respuestas: { ...form },
+      respuestas: {
+        ...form,
+        historial_esposo: historialEsposoRef.current?.getValues(),
+        historial_esposa: historialEsposaRef.current?.getValues(),
+      },
     });
     if (r.ok) router.push(`/f/${token}/enviado`);
     else { setError(r.error); setLoading(false); }
@@ -202,6 +209,24 @@ export default function EvaluacionMatrimonialForm({ tokenId, token, personaId, n
         )}
 
         {paso === 6 && (
+          <Section title="Historial personal" emoji="📜">
+            <p className="text-sm text-stone-500">
+              Cada uno responde por separado. Estas preguntas nos ayudan a conocer mejor el contexto de cada uno.
+            </p>
+            <div className="space-y-6">
+              <div>
+                <h3 className="text-base font-semibold text-stone-700 mb-2">Esposo</h3>
+                <PreguntasHistorial ref={historialEsposoRef} accent="rose" title="" subtitle="" />
+              </div>
+              <div>
+                <h3 className="text-base font-semibold text-stone-700 mb-2">Esposa</h3>
+                <PreguntasHistorial ref={historialEsposaRef} accent="rose" title="" subtitle="" />
+              </div>
+            </div>
+          </Section>
+        )}
+
+        {paso === 7 && (
           <Section title="Confirmación" emoji="🕊️">
             <div className="bg-amber-50/60 border border-amber-200 rounded-2xl p-5 text-stone-700 text-sm leading-relaxed">
               Entendemos que este proceso busca acompañarnos en oración, escucha y verdad bíblica,

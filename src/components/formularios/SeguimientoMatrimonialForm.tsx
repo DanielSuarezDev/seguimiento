@@ -1,7 +1,8 @@
 "use client";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { responderFormulario } from "@/app/f/[token]/actions";
+import PreguntasHistorial, { type HistorialHandle } from "./PreguntasHistorial";
 
 interface Props { tokenId: string; token: string; personaId: string; nombrePersona: string }
 
@@ -26,6 +27,7 @@ const conversacionOpts = ["Sí, varias veces", "Sí, una vez", "Lo intentamos", 
 
 export default function SeguimientoMatrimonialForm({ tokenId, token, personaId }: Props) {
   const router = useRouter();
+  const historialRef = useRef<HistorialHandle>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [form, setForm] = useState<FormData>({
@@ -42,7 +44,7 @@ export default function SeguimientoMatrimonialForm({ tokenId, token, personaId }
     const r = await responderFormulario({
       token, tokenId, personaId,
       tipo: "seguimiento_matrimonial",
-      respuestas: { ...form },
+      respuestas: { ...form, historial: historialRef.current?.getValues() },
     });
     if (r.ok) router.push(`/f/${token}/enviado`);
     else { setError(r.error); setLoading(false); }
@@ -90,6 +92,8 @@ export default function SeguimientoMatrimonialForm({ tokenId, token, personaId }
       <Card title="Esta próxima semana">
         <Textarea label="¿Qué necesitan trabajar juntos esta próxima semana?" value={form.trabajar_proxima} onChange={(v) => set("trabajar_proxima", v)} rows={3} />
       </Card>
+
+      <PreguntasHistorial ref={historialRef} accent="rose" />
 
       {error && <p className="text-sm bg-amber-50 border border-amber-200 text-amber-800 px-4 py-3 rounded-xl">{error}</p>}
 

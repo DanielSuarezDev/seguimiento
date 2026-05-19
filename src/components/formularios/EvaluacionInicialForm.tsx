@@ -1,7 +1,8 @@
 "use client";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { responderFormulario } from "@/app/f/[token]/actions";
+import PreguntasHistorial, { type HistorialHandle } from "./PreguntasHistorial";
 
 interface Props { tokenId: string; token: string; personaId: string; nombrePersona: string; }
 
@@ -41,10 +42,11 @@ const sentimientosOpciones = [
   "Solo", "Agotado", "Con esperanza", "Culpable", "Temeroso",
 ];
 
-const TOTAL_PASOS = 8;
+const TOTAL_PASOS = 9;
 
 export default function EvaluacionInicialForm({ tokenId, token, personaId, nombrePersona }: Props) {
   const router = useRouter();
+  const historialRef = useRef<HistorialHandle>(null);
   const [paso, setPaso] = useState(1);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -85,7 +87,7 @@ export default function EvaluacionInicialForm({ tokenId, token, personaId, nombr
     if (actual === 4) {
       if (!form.situacion_actual.trim()) return "Cuéntanos brevemente qué está pasando en tu vida.";
     }
-    if (actual === 8) {
+    if (actual === 9) {
       if (!form.consentimiento) return "Necesitamos tu consentimiento para continuar.";
     }
     return null;
@@ -106,13 +108,13 @@ export default function EvaluacionInicialForm({ tokenId, token, personaId, nombr
   }
 
   async function handleSubmit() {
-    const err = validarPaso(8);
+    const err = validarPaso(9);
     if (err) { setErrorPaso(err); return; }
     setLoading(true);
     const result = await responderFormulario({
       token, tokenId, personaId,
       tipo: "evaluacion_inicial",
-      respuestas: { ...form },
+      respuestas: { ...form, historial: historialRef.current?.getValues() },
     });
     if (result.ok) router.push(`/f/${token}/enviado`);
     else { setError(result.error); setLoading(false); }
@@ -144,7 +146,8 @@ export default function EvaluacionInicialForm({ tokenId, token, personaId, nombr
         {paso === 5 && <PasoEspiritual form={form} set={set} />}
         {paso === 6 && <PasoCorazon form={form} set={set} />}
         {paso === 7 && <PasoCaminar form={form} set={set} />}
-        {paso === 8 && <PasoConsentimiento form={form} set={set} />}
+        {paso === 8 && <PreguntasHistorial ref={historialRef} accent="amber" />}
+        {paso === 9 && <PasoConsentimiento form={form} set={set} />}
 
         {errorPaso && (
           <p className="text-sm bg-amber-50 border border-amber-200 text-amber-800 px-4 py-3 rounded-xl">

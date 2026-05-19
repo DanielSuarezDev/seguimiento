@@ -6,6 +6,7 @@ import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { responderFormulario } from "@/app/f/[token]/actions";
+import PreguntasHistorial, { type HistorialHandle } from "./PreguntasHistorial";
 
 interface Props { tokenId: string; token: string; personaId: string; nombrePersona: string }
 
@@ -41,6 +42,7 @@ type FormValues = z.output<typeof schema>;
 
 export default function SeguimientoSemanalForm({ tokenId, token, personaId }: Props) {
   const router = useRouter();
+  const historialRef = useRef<HistorialHandle>(null);
   const {
     control, register, handleSubmit, watch, setValue,
     formState: { isSubmitting, errors },
@@ -79,10 +81,11 @@ export default function SeguimientoSemanalForm({ tokenId, token, personaId }: Pr
   }
 
   async function onSubmit(values: FormValues) {
+    const historial = historialRef.current?.getValues();
     const result = await responderFormulario({
       token, tokenId, personaId,
       tipo: "seguimiento_semanal",
-      respuestas: values as unknown as Record<string, unknown>,
+      respuestas: { ...(values as unknown as Record<string, unknown>), historial },
     });
     if (result.ok) router.push(`/f/${token}/enviado`);
   }
@@ -239,6 +242,8 @@ export default function SeguimientoSemanalForm({ tokenId, token, personaId }: Pr
             <Autotextarea {...register("ocupo_mente")} placeholder="Lo que aparece cuando todo se queda en silencio." />
           </Field>
         </SectionCard>
+
+        <PreguntasHistorial ref={historialRef} accent="amber" />
 
         {/* Footer cálido */}
         <div className="rounded-3xl bg-gradient-to-br from-amber-50 via-stone-50 to-emerald-50/40 border border-amber-100 p-6 sm:p-8 text-center space-y-4">

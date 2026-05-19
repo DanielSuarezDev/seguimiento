@@ -1,7 +1,8 @@
 "use client";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { responderFormulario } from "@/app/f/[token]/actions";
+import PreguntasHistorial, { type HistorialHandle } from "./PreguntasHistorial";
 
 interface Tarea { id: string; titulo: string; descripcion: string | null; }
 interface Props { tokenId: string; token: string; personaId: string; nombrePersona: string; tareas: Tarea[]; }
@@ -10,6 +11,7 @@ const dificultadLabel = ["", "Muy fácil", "Fácil", "Normal", "Difícil", "Muy 
 
 export default function TareasTerapeuticasForm({ tokenId, token, personaId, tareas }: Props) {
   const router = useRouter();
+  const historialRef = useRef<HistorialHandle>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -31,6 +33,7 @@ export default function TareasTerapeuticasForm({ tokenId, token, personaId, tare
         ...reportes[t.id],
       })),
       reflexion,
+      historial: historialRef.current?.getValues(),
     };
     const result = await responderFormulario({
       token, tokenId, personaId,
@@ -99,6 +102,8 @@ export default function TareasTerapeuticasForm({ tokenId, token, personaId, tare
         <label className="label">Reflexión general de la semana</label>
         <textarea value={reflexion} onChange={(e) => setReflexion(e.target.value)} rows={3} className="input resize-none" placeholder="¿Hay algo más que quieras compartir con tu consejero?" />
       </div>
+
+      <PreguntasHistorial ref={historialRef} accent="amber" />
 
       {error && <p className="text-red-500 text-sm bg-red-50 px-4 py-3 rounded-lg">{error}</p>}
       <button type="submit" disabled={loading} className="w-full bg-amber-700 hover:bg-amber-800 disabled:opacity-50 text-white font-medium py-3 rounded-xl transition-colors">
